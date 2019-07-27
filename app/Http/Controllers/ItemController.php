@@ -15,7 +15,7 @@ class ItemController extends Controller
      */
     public function index()
     {
-        return 123;
+        return response()->json(['data' => Item::all()], 200);
 
     }
 
@@ -29,7 +29,7 @@ class ItemController extends Controller
     {
         $validated = $request->validated();
         $responseData = Item::create($validated);
-        return response()->json($responseData, 201);
+        return response()->json(['data' => $responseData], 201);
     }
 
     /**
@@ -40,30 +40,22 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return response(['data' => Item::find($id)], 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param  StoreItemRequest $request
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreItemRequest $request, $id)
     {
-        //
+        $validated = $request->validated();
+        $item = Item::find($id);
+        $responseData = $item->fill($validated)->save();
+        return response(['data' => $responseData], 200);
     }
 
     /**
@@ -71,9 +63,14 @@ class ItemController extends Controller
      *
      * @param  int $id
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy($id)
     {
-        //
+        $item = Item::find($id);
+        if ($item->delete()) {
+            return response([], 200);
+        };
+
     }
 }

@@ -36,5 +36,5 @@ Route::middleware('auth:api')->group(function () {
 
 
 Route::resource('items', 'ItemController')->except([
-    'create'
+    'create', 'edit'
 ]);

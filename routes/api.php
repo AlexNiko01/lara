@@ -33,3 +33,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('user/', 'UserController@create');
     Route::get('user/{user}', 'UserController@show');
 });
+
+
+Route::resource('items', 'ItemController')->except([
+    'create'
+]);

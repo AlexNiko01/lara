@@ -6,9 +6,6 @@ use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Http\Resources\ItemResourse;
 use App\Item;
-use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
@@ -31,8 +28,7 @@ class ItemController extends Controller
     public function store(StoreItemRequest $request): ItemResourse
     {
         $validated = $request->validated();
-        $item = Item::create($validated);
-        $resourse = new ItemResourse($item);
+        $resourse = new ItemResourse(Item::create($validated));
         return $resourse;
     }
 

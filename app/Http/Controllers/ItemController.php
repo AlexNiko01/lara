@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreItemRequest;
+use App\Http\Requests\UpdateItemRequest;
+use App\Http\Resources\ItemResourse;
 use App\Item;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -16,20 +20,20 @@ class ItemController extends Controller
     public function index()
     {
         return response()->json(['data' => Item::all()], 200);
-
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  StoreItemRequest $request
-     * @return \Illuminate\Http\Response
+     * @return ItemResourse
      */
-    public function store(StoreItemRequest $request)
+    public function store(StoreItemRequest $request): ItemResourse
     {
         $validated = $request->validated();
-        $responseData = Item::create($validated);
-        return response()->json(['data' => $responseData], 201);
+        $item = Item::create($validated);
+        $resourse = new ItemResourse($item);
+        return $resourse;
     }
 
     /**
@@ -40,22 +44,26 @@ class ItemController extends Controller
      */
     public function show($id)
     {
-        return response(['data' => Item::find($id)], 200);
+        $item = Item::find($id);
+        if (!$item) {
+            return response(['message' => 'item not found'], 404);
+        }
+        return response(['data' => $item], 200);
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  StoreItemRequest $request
+     * @param  UpdateItemRequest $request
      * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @return ItemResourse
      */
-    public function update(StoreItemRequest $request, $id)
+    public function update(UpdateItemRequest $request, $id): ItemResourse
     {
         $validated = $request->validated();
-        $item = Item::find($id);
-        $responseData = $item->fill($validated)->save();
-        return response(['data' => $responseData], 200);
+        Item::find($id)->fill($validated)->save();
+        $resourse = new ItemResourse(Item::find($id));
+        return $resourse;
     }
 
     /**
@@ -68,9 +76,10 @@ class ItemController extends Controller
     public function destroy($id)
     {
         $item = Item::find($id);
-        if ($item->delete()) {
-            return response([], 200);
-        };
-
+        if (!$item) {
+            return response(['message' => 'item not found'], 404);
+        }
+        $item->delete();
+        return response(['data' => ['id' => $id]], 200);
     }
 }

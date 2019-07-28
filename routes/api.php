@@ -27,14 +27,16 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
 });
+Route::post('register/', 'UserController@create');
+
 
 Route::middleware('auth:api')->group(function () {
-    Route::post('user/', 'UserController@create');
     Route::get('user/{user}', 'UserController@show');
     Route::resource('items', 'ItemController')->except([
         'create', 'edit'
     ]);
 });
+
 
 
 

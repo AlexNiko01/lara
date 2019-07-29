@@ -49,8 +49,8 @@ class ItemService
      */
     public function update(array $validated, $id): ItemResourse
     {
-        Item::findOrFail($id)->fill($validated)->save();
-        $resourse = new ItemResourse(Item::findOrFail($id));
+        $item = Item::findOrFail($id)->fill($validated)->save();
+        $resourse = new ItemResourse($item);
         return $resourse;
     }
 

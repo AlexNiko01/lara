@@ -5,18 +5,27 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreItemRequest;
 use App\Http\Requests\UpdateItemRequest;
 use App\Http\Resources\ItemResourse;
-use App\Item;
+use App\Services\ItemService;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * @var ItemService
      */
-    public function index()
+    private $itemService;
+
+    public function __construct(ItemService $itemService)
     {
-        return response()->json(['data' => Item::all()], 200);
+        $this->itemService = $itemService;
+    }
+
+    /**
+     * @return AnonymousResourceCollection
+     */
+    public function index(): AnonymousResourceCollection
+    {
+        return $this->itemService->getAll();
     }
 
     /**
@@ -28,23 +37,16 @@ class ItemController extends Controller
     public function store(StoreItemRequest $request): ItemResourse
     {
         $validated = $request->validated();
-        $resourse = new ItemResourse(Item::create($validated));
-        return $resourse;
+        return $this->itemService->store($validated);
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param $id
+     * @return ItemResourse
      */
     public function show($id)
     {
-        $item = Item::find($id);
-        if (!$item) {
-            return response(['message' => 'item not found'], 404);
-        }
-        return response(['data' => $item], 200);
+        return $this->itemService->show($id);
     }
 
     /**
@@ -57,25 +59,15 @@ class ItemController extends Controller
     public function update(UpdateItemRequest $request, $id): ItemResourse
     {
         $validated = $request->validated();
-        Item::find($id)->fill($validated)->save();
-        $resourse = new ItemResourse(Item::find($id));
-        return $resourse;
+        return $this->itemService->update($validated, $id);
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
+     * @param $id
      * @throws \Exception
      */
     public function destroy($id)
     {
-        $item = Item::find($id);
-        if (!$item) {
-            return response(['message' => 'item not found'], 404);
-        }
-        $item->delete();
-        return response(['data' => ['id' => $id]], 200);
+        $this->itemService->destroy($id);
     }
 }
